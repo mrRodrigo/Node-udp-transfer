@@ -1,39 +1,57 @@
-const PORT = 33333;
-const HOST = "127.0.0.1";
+const ROUTERPORT = 33333;
+const HOST = "192.168.1.165";
 
 var dgram = require("dgram");
-var server = dgram.createSocket("udp4");
 
-server.on("listening", function() {
-  var address = server.address();
-  console.log(
-    "UDP Server listening on " + address.address + ":" + address.port
-  );
+var udphosts = [5550, 5551, 33333];
+
+udphosts.forEach(port => {
+  let server = dgram.createSocket("udp4");
+  server.bind(port, HOST);
+  server.on("listening", function() {
+    var address = server.address();
+    console.log("listening " + address.address + " port::" + address.port);
+  });
+  /* 
+    Quando recebermos uma mensagem na porta destinada para o reteamento 
+    chamamos a função readDestination 
+  */
+  if (port == ROUTERPORT) {
+    server.on("message", function(msg, rinfo) {
+      readDestination(msg);
+    });
+  } else {
+    server.on("message", function(msg, rinfo) {
+      console.log(
+        "message received :: " +
+          msg +
+          " address::" +
+          rinfo.address +
+          " port = " +
+          rinfo.port
+      );
+    });
+  }
 });
 
-server.on("message", function(message, remote) {
-  console.log("oi", JSON.parse(message));
-  readDestinationAndSend(message);
-});
+function readDestination(msg) {
+  const { destinationIp, port, message } = JSON.parse(msg.toString());
 
-server.bind(PORT, HOST);
-
-function readDestinationAndSend(mes) {
-  const { destinationIp, port, message } = JSON.parse(mes.toString("utf8"));
-  let client = dgram.createSocket("udp4");
-
-  if (destinationIp == server.address()) {
-    if (port == PORT) {
+  if (destinationIp == HOST) {
+    if (port == ROUTERPORT) {
       console.log(message);
       return;
     }
-    client.send(mes, 0, mes.length, port, destinationIp, function(err, bytes) {
-      if (err) throw err;
-      client.close();
-    });
   }
+  send(message, port, destinationIp);
+}
 
-  client.send(mes, 0, mes.length, PORT, destinationIp, function(err, bytes) {
+function send(message, port, destination) {
+  let client = dgram.createSocket("udp4");
+  client.send(message, 0, message.length, port, destination, function(
+    err,
+    bytes
+  ) {
     if (err) throw err;
     client.close();
   });

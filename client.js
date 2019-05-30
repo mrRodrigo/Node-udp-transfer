@@ -5,45 +5,49 @@ var port = 4040;
 var ip = "127.0.0.1";
 
 var dgram = require("dgram");
-var message = new Buffer("My KungFu is Good!");
 var socket = dgram.createSocket("udp4");
 
-var foi = false;
-//Escutar pacotes
-socket.on("listening", function() {
-  var address = socket.address();
-  console.log(
-    "UDP Server listening on " + address.address + ":" + address.port
-  );
-});
+var udphosts = [5550, 5551];
 
-socket.on("message", function(mes, remote) {
-  const { originIp, port, message } = mes;
-  console.log(originIp + ":" + port + " - " + message);
-});
+// udphosts.forEach(port => {
+//   socket.bind(port, "127.0.0.1");
+//   socket.on("listening", function() {
+//     var address = socket.address();
+//     console.log("listening" + address.address + " port::" + address.port);
+//   });
+//   socket.on("message", function(msg, rinfo) {
+//     console.log(
+//       "message received :: " +
+//         msg +
+//         " address::" +
+//         rinfo.address +
+//         "port = " +
+//         rinfo.port
+//     );
+//   });
+// });
 
-socket.bind(port, ip);
+var encodedMessage = addHeader("alo", 5551, ip);
+send(encodedMessage, ROUTERPORT, ROUTERHOST);
 
-addHeaderAndSend("alo", 33333, ip);
-
-function addHeaderAndSend(message, port, destinationIp) {
+function addHeader(message, port, destinationIp) {
   var encodedMessage = {
     destinationIp,
     originIp: "socket.address()",
     port,
     message
   };
-  var buffer = JSON.stringify(encodedMessage);
-  if (!foi) {
-    socket.send(buffer, 0, buffer.length, ROUTERPORT, ROUTERHOST, function(
-      err,
-      bytes
-    ) {
-      if (err) throw err;
-      //console.log("UDP message sent to " + HOST + ":" + PORT);
-      //socket.close();
-      console.log("TA MANDANDO !!!!!!!!!!!!!");
-    });
-    foi = true;
-  }
+  var msg = new Buffer(JSON.stringify(encodedMessage));
+  return msg;
+}
+
+function send(message, port, destination) {
+  let client = dgram.createSocket("udp4");
+  client.send(message, 0, message.length, port, destination, function(
+    err,
+    bytes
+  ) {
+    if (err) throw err;
+    client.close();
+  });
 }
