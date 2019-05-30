@@ -4,10 +4,10 @@ const HOST = "127.0.0.1";
 var dgram = require("dgram");
 
 var udphosts = [
-  { host: " HOST 1 ", port: 5550 },
-  { host: " HOST 2 ", port: 5551 },
-  { host: " HOST 3 ", port: 5552 },
-  { host: " ROTEADOR ", port: 33333 }
+  { host: "HOST 1", port: 5550 },
+  { host: "HOST 2", port: 5551 },
+  { host: "HOST 3", port: 5552 },
+  { host: "ROUTER", port: 33333 }
 ];
 
 const setHosts = async () => {
@@ -17,7 +17,11 @@ const setHosts = async () => {
     server.on("listening", function() {
       var address = server.address();
       console.log(
-        "listening " + address.address + " port::" + address.port + host.host
+        "listening " +
+          address.address +
+          " port::" +
+          address.port +
+          `[${host.host}]`
       );
     });
     /* 
@@ -26,27 +30,29 @@ const setHosts = async () => {
   */
     if (host.port == ROUTERPORT) {
       server.on("message", function(msg, rinfo) {
-        readDestination(msg);
+        readDestination(JSON.parse(msg.toString()));
       });
     } else {
       server.on("message", function(msg, rinfo) {
+        let msgObj = JSON.parse(msg);
         console.log(
-          `[${server.address().port}] ` +
-            " message received :: " +
-            msg +
-            " address:: " +
+          `[${host.host}::${server.address().port}] ` +
+            '[Message received]: "' +
+            msgObj.message +
+            '" From: [' +
             rinfo.address +
-            " port = " +
-            rinfo.port
+            "::" +
+            msgObj.origin +
+            "]"
         );
       });
     }
   });
-  console.log("####################\n");
+  console.log("\n");
 };
 
 function readDestination(msg) {
-  const { destinationIp, port, message } = JSON.parse(msg.toString());
+  const { destinationIp, port, message } = msg;
 
   if (destinationIp == HOST) {
     if (port == ROUTERPORT) {
@@ -54,16 +60,16 @@ function readDestination(msg) {
       return;
     }
   }
+
   console.log("[ROUTER::33333] Roteado para::" + port);
-  send(message, port, destinationIp);
+  send(msg, port, destinationIp);
 }
 
 function send(message, port, destination) {
   let client = dgram.createSocket("udp4");
-  client.send(message, 0, message.length, port, destination, function(
-    err,
-    bytes
-  ) {
+  let msg = Buffer.from(JSON.stringify(message));
+
+  client.send(msg, 0, msg.length, port, destination, function(err, bytes) {
     if (err) throw err;
     client.close();
   });

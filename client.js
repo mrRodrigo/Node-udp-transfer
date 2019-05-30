@@ -1,43 +1,27 @@
+const dgram = require("dgram");
+
 const ROUTERPORT = 33333;
 const ROUTERHOST = "127.0.0.1";
 
-var port = 5552;
-var ip = "127.0.0.1";
+var SENDPORT = process.argv[3];
+var SENDHOST = process.argv[2];
+var MESSAGE = process.argv[4];
 
-var dgram = require("dgram");
-var socket = dgram.createSocket("udp4");
+/*
+ * node client.js 127.0.0.1 5551 "hello from hell" 3399
+ */
 
-var udphosts = [5550, 5551];
-
-// udphosts.forEach(port => {
-//   socket.bind(port, "127.0.0.1");
-//   socket.on("listening", function() {
-//     var address = socket.address();
-//     console.log("listening" + address.address + " port::" + address.port);
-//   });
-//   socket.on("message", function(msg, rinfo) {
-//     console.log(
-//       "message received :: " +
-//         msg +
-//         " address::" +
-//         rinfo.address +
-//         "port = " +
-//         rinfo.port
-//     );
-//   });
-// });
-
-var encodedMessage = addHeader("alo", port, ip);
+var encodedMessage = addHeader(MESSAGE, SENDPORT, SENDHOST);
 send(encodedMessage, ROUTERPORT, ROUTERHOST);
 
 function addHeader(message, port, destinationIp) {
   var encodedMessage = {
     destinationIp,
-    originIp: "socket.address()",
+    origin: process.argv[5],
     port,
     message
   };
-  var msg = new Buffer(JSON.stringify(encodedMessage));
+  var msg = Buffer.from(JSON.stringify(encodedMessage));
   return msg;
 }
 
