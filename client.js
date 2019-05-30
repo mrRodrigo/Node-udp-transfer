@@ -1,7 +1,7 @@
 const ROUTERPORT = 33333;
 const ROUTERHOST = "127.0.0.1";
 
-var port = 4040;
+var port = 5552;
 var ip = "127.0.0.1";
 
 var dgram = require("dgram");
@@ -27,7 +27,7 @@ var udphosts = [5550, 5551];
 //   });
 // });
 
-var encodedMessage = addHeader("alo", 5551, ip);
+var encodedMessage = addHeader("alo", port, ip);
 send(encodedMessage, ROUTERPORT, ROUTERHOST);
 
 function addHeader(message, port, destinationIp) {
