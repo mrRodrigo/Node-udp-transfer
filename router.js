@@ -1,15 +1,13 @@
+const udphosts = require("./configHosts");
+const dgram = require("dgram");
 const ROUTERPORT = 33333;
 const HOST = "127.0.0.1";
 
-var dgram = require("dgram");
-
-var udphosts = [
-  { host: "HOST 1", port: 5550 },
-  { host: "HOST 2", port: 5551 },
-  { host: "HOST 3", port: 5552 },
-  { host: "ROUTER", port: 33333 }
-];
-
+/* 
+  Levanta todos os hosts nas respectivas portas do arquivo configHosts.js
+  quando a porta for igual a ROUTERPORT este host será o roteador e quando receber uma mensagem
+  executara a função readDestination.
+*/
 const setHosts = async () => {
   await udphosts.map(host => {
     let server = dgram.createSocket("udp4");
@@ -51,6 +49,10 @@ const setHosts = async () => {
   console.log("\n");
 };
 
+/* 
+  Quando um roteador recebe uma mensagem é executada esta função.
+  abrimos a mensagem e pegamos o destino/porta real e a menssagem em si.
+*/
 function readDestination(msg) {
   const { destinationIp, port, message } = msg;
 
@@ -65,6 +67,7 @@ function readDestination(msg) {
   send(msg, port, destinationIp);
 }
 
+/* envia uma mensagem para um determinado host */
 function send(message, port, destination) {
   let client = dgram.createSocket("udp4");
   let msg = Buffer.from(JSON.stringify(message));

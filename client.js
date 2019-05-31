@@ -1,10 +1,15 @@
 const dgram = require("dgram");
 
+// Porta para o roteador da máquina esta enviando a mensagem
 const ROUTERPORT = 33333;
+// Ip para o roteador da máquina esta enviando a mensagem
 const ROUTERHOST = "127.0.0.1";
 
+// Porta do host que quero enviar a mensagem
 var SENDPORT = process.argv[3];
+// ip do host que quero enviar a mensagem
 var SENDHOST = process.argv[2];
+// Mensagem a ser enviada
 var MESSAGE = process.argv[4];
 
 /*
@@ -21,8 +26,7 @@ function addHeader(message, port, destinationIp) {
     port,
     message
   };
-  var msg = Buffer.from(JSON.stringify(encodedMessage));
-  return msg;
+  return Buffer.from(JSON.stringify(encodedMessage));
 }
 
 function send(message, port, destination) {
