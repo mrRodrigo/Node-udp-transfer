@@ -1,4 +1,5 @@
 const dgram = require("dgram");
+const fs = require('fs');
 
 // Porta para o roteador da máquina esta enviando a mensagem
 const ROUTERPORT = 33333;
@@ -19,12 +20,24 @@ var MESSAGE = process.argv[4];
 var encodedMessage = addHeader(MESSAGE, SENDPORT, SENDHOST);
 send(encodedMessage, ROUTERPORT, ROUTERHOST);
 
+
+function getByteArray(filePath){
+    let fileData = fs.readFileSync(filePath).toString('hex');
+    let result = []
+    for (var i = 0; i < fileData.length; i+=2)
+      result.push('0x'+fileData[i]+''+fileData[i+1])
+    return result;
+}
+
+//result = getByteArray('./teste.txt')
+//console.log(result)
+
 function addHeader(message, port, destinationIp) {
   var encodedMessage = {
     destinationIp,
     origin: process.argv[5],
     port,
-    message
+    message:getByteArray(`./${process.argv[4]}`)
   };
   return Buffer.from(JSON.stringify(encodedMessage));
 }
