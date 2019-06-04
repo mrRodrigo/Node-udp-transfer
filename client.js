@@ -3,7 +3,7 @@ const dgram = require("dgram");
 // Porta para o roteador da máquina esta enviando a mensagem
 const ROUTERPORT = 33333;
 // Ip para o roteador da máquina esta enviando a mensagem
-const ROUTERHOST = "127.0.0.1";
+const ROUTERHOST = "10.32.143.70";
 
 // Porta do host que quero enviar a mensagem
 var SENDPORT = process.argv[3];
@@ -31,11 +31,21 @@ function addHeader(message, port, destinationIp) {
 
 function send(message, port, destination) {
   let client = dgram.createSocket("udp4");
-  client.send(message, 0, message.length, port, destination, function(
-    err,
-    bytes
-  ) {
-    if (err) throw err;
-    client.close();
-  });
+  if (SENDHOST === ROUTERHOST) {
+    client.send(message, 0, message.length, SENDPORT, SENDHOST, function (
+      err,
+      bytes
+    ) {
+      if (err) throw err;
+      client.close();
+    });
+  } else {
+    client.send(message, 0, message.length, port, destination, function (
+      err,
+      bytes
+    ) {
+      if (err) throw err;
+      client.close();
+    });
+  }
 }

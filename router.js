@@ -1,7 +1,7 @@
 const udphosts = require("./configHosts");
 const dgram = require("dgram");
 const ROUTERPORT = 33333;
-const HOST = "127.0.0.1";
+const HOST = "10.32.143.70";
 
 /* 
   Levanta todos os hosts nas respectivas portas do arquivo configHosts.js
@@ -63,7 +63,7 @@ function readDestination(msg) {
     }
   }
 
-  console.log("[ROUTER::33333] Roteado para::" + port);
+  console.log("[ROUTER::33333] Roteado para::" +" IP: "+ destinationIp+" PORT: " +port);
   send(msg, port, destinationIp);
 }
 
