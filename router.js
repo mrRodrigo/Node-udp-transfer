@@ -25,7 +25,7 @@ const setHosts = async () => {
     /* 
     Quando recebermos uma mensagem na porta destinada para o reteamento 
     chamamos a função readDestination 
-  */
+   */
     if (host.port == ROUTERPORT) {
       server.on("message", function(msg, rinfo) {
         readDestination(JSON.parse(msg.toString()));
