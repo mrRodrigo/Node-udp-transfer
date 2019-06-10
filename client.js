@@ -14,7 +14,7 @@ var SENDHOST = process.argv[2];
 var MESSAGE = process.argv[4];
 
 /*
- * node client.js 127.0.0.1 5551 "hello from hell" 3399
+ * node client.js 127.0.0.1 5551 teste.txt 3399
  */
 
 var encodedMessage = addHeader(MESSAGE, SENDPORT, SENDHOST);
